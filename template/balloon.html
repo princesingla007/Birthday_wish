@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Balloon Pop Surprise</title>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: #ffe6f0; /* baby pink */
+    overflow: hidden;
+    position: relative;
+    height: 100vh;
+    max-width: 100%;
+}
+
+/* 🎀 Instruction text */
+#instruction {
+    position: absolute;
+    top: 1.5%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(14px, 4.5vw, 20px);
+    color: #ff4081;
+    font-weight: bold;
+    text-align: center;
+    background: rgba(255,255,255,0.9);
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 2px solid #ff4081;
+    z-index: 30;
+    animation: pulse 1.5s infinite;
+    max-width: 90%;
+    line-height: 1.4;
+}
+
+@keyframes pulse {
+    0% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.05); }
+    100% { transform: translateX(-50%) scale(1); }
+}
+
+/* Balloon container */
+.balloon {
+    position: absolute;
+    font-size: clamp(36px, 9vw, 70px);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Pop animation */
+.pop {
+    transform: scale(0);
+    opacity: 0;
+}
+
+/* Message box */
+#message {
+    position: absolute;
+    bottom: 16%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff8dc;
+    border: 2px solid #ff4081;
+    border-radius: 12px;
+    padding: 12px;
+    max-width: 92%;
+    font-size: clamp(13px, 4vw, 17px);
+    text-align: center;
+    color: #ff4081;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    max-height: 45vh;
+    overflow-y: auto;
+    z-index: 10;
+    line-height: 1.4;
+}
+
+/* Floating animation */
+@keyframes floatUp {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-120vh); }
+}
+
+/* 🎆 Celebration background animation */
+.confetti {
+    position: fixed;
+    top: -10px;
+    width: 10px;
+    height: 10px;
+    background: red;
+    opacity: 0.8;
+    animation: fall linear forwards;
+    border-radius: 50%;
+    z-index: 5;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* Hidden Next button */
+#next-btn {
+    display: none;
+    position: absolute;
+    bottom: 4%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff4081;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px;
+    font-size: clamp(14px, 4vw, 18px);
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, background 0.3s ease;
+    z-index: 20;
+}
+#next-btn:hover {
+    background: #e91e63;
+    transform: scale(1.05);
+}
+
+/* 📱 Mobile tweaks */
+@media (max-width: 600px) {
+    #message {
+        font-size: 14px;
+        padding: 10px;
+        max-height: 40vh;
+    }
+    #instruction {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+    #next-btn {
+        width: 80%;
+        font-size: 16px;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- Instruction -->
+<div id="instruction">💖 Tap the emojis to reveal my surprise 🎈✨</div>
+
+<div id="message"></div>
+
+<!-- Next button -->
+<a href="{% url 'last' %}">
+    <button id="next-btn">Next Surprise 🎈</button>
+</a>
+
+<script>
+// Messages to show
+const messageParts = [
+    "🎉 Surprise! ",
+    "Happy Birthday my girl! 💖 ",
+    "Each balloon hides a part of my message. ",
+    "I LOVE YOU SO MUCH 😘 ",
+    "You are my everything 🎂🎈 ",
+    "Thank you for being with me always 💌 ",
+    "Wishing you endless joy and love 🎊 ",
+    "Have the happiest day! ✨ ",
+    "This was a little surprise for you 🎊 ",
+    "Hope you like it 🎂🎈 ",
+    "I can also upload Images of us but I want to host it so I think it's not right 💖"
+];
+
+const totalBalloons = messageParts.length;
+let poppedCount = 0;
+const balloonsEmojis = ['🎈','🎉','💖','🎂','🎁','💌','🎊','✨'];
+
+// Generate balloons
+for (let i=0; i<totalBalloons; i++){
+    const balloon = document.createElement('div');
+    balloon.classList.add('balloon');
+    balloon.innerText = balloonsEmojis[i % balloonsEmojis.length];
+    balloon.style.left = `${Math.random()*80 + 5}%`;
+    balloon.style.top = `${Math.random()*60 + 25}%`;
+    balloon.style.animation = `floatUp ${5 + Math.random()*5}s linear infinite`;
+    document.body.appendChild(balloon);
+
+    balloon.addEventListener('click', () => {
+        if(balloon.classList.contains('pop')) return;
+        balloon.classList.add('pop');
+        const messageDiv = document.getElementById('message');
+        messageDiv.innerHTML += messageParts[poppedCount] + "<br>";
+        messageDiv.style.opacity = 1;
+        poppedCount++;
+
+        // 🎆 When all balloons popped -> start celebration + show button
+        if(poppedCount === totalBalloons){
+            startCelebration();
+            document.getElementById('next-btn').style.display = "block";
+        }
+    });
+}
+
+// Random floating speed
+function randomFloat(){
+    document.querySelectorAll('.balloon').forEach(b => {
+        b.style.animationDuration = `${5 + Math.random()*5}s`;
+    });
+}
+setInterval(randomFloat, 4000);
+
+// 🎉 Celebration background function
+function startCelebration(){
+    setInterval(() => {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        document.body.appendChild(confetti);
+
+        // Random confetti position & color
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.background = randomColor();
+        confetti.style.width = confetti.style.height = Math.random()*8 + 5 + "px";
+        confetti.style.animationDuration = 3 + Math.random()*2 + "s";
+
+        // Remove after animation
+        setTimeout(() => confetti.remove(), 5000);
+    }, 100);
+}
+
+function randomColor(){
+    const colors = ["#ff4081", "#ffeb3b", "#4caf50", "#2196f3", "#ff5722", "#9c27b0"];
+    return colors[Math.floor(Math.random()*colors.length)];
+}
+</script>
+</body>
+</html>
