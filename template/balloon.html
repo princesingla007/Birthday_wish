@@ -105,10 +105,10 @@ body {
     }
 }
 
-/* Hidden Next button */
+/* Next button - fixed for mobile/desktop */
 #next-btn {
     display: none;
-    position: absolute;
+    position: fixed; /* changed from absolute */
     bottom: 4%;
     left: 50%;
     transform: translateX(-50%);
@@ -121,7 +121,7 @@ body {
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     transition: transform 0.3s ease, background 0.3s ease;
-    z-index: 20;
+    z-index: 50;
 }
 #next-btn:hover {
     background: #e91e63;
@@ -140,8 +140,9 @@ body {
         padding: 6px 10px;
     }
     #next-btn {
-        width: 80%;
+        width: 90%;
         font-size: 16px;
+        bottom: 3%;
     }
 }
 </style>
@@ -199,7 +200,10 @@ for (let i=0; i<totalBalloons; i++){
         // 🎆 When all balloons popped -> start celebration + show button
         if(poppedCount === totalBalloons){
             startCelebration();
-            document.getElementById('next-btn').style.display = "block";
+            const btn = document.getElementById('next-btn');
+            btn.style.display = "block";
+            btn.style.opacity = 0;
+            setTimeout(() => { btn.style.opacity = 1; }, 100); // smooth fade-in
         }
     });
 }
